@@ -1,9 +1,12 @@
 let targetId;
 
 $(document).ready(function () {
+    
+    alert("시작");
     // id 가 query 인 녀석 위에서 엔터를 누르면 execSearch() 함수를 실행하라는 뜻입니다.
     $('#query').on('keypress', function (e) {
         if (e.key == 'Enter') {
+            alert("오니?");
             execSearch();
         }
     });
@@ -42,15 +45,35 @@ function numberWithCommas(x) {
 //////////////////////////////////////////////////////////////////////////////////////////
 
 function execSearch() {
+
+    alert("오니?");
     /**
      * 검색어 input id: query
      * 검색결과 목록: #search-result-box
      * 검색결과 HTML 만드는 함수: addHTML
      */
     // 1. 검색창의 입력값을 가져온다.
+    let query = $('#query').val();
     // 2. 검색창 입력값을 검사하고, 입력하지 않았을 경우 focus.
+    if(query == ''){
+        alert("검색어를 입력해 주세요.");
+        $('query').focus();
+    }
     // 3. GET /api/search?query=${query} 요청
+    $.ajax({
+        type: 'GET',
+        url: '/api/search?query=${query}',
+        success: function (response){
+            for(let i = 0; i<response.length(); i++){
+                let itemDto = response[i];
+                let tempHtml = addHTML(itemDto);
+                $('#search-result-box').append(tempHtml);
+            }
+        }
+    })
     // 4. for 문마다 itemDto를 꺼내서 HTML 만들고 검색결과 목록에 붙이기!
+
+
 
 }
 
@@ -60,7 +83,21 @@ function addHTML(itemDto) {
      * image, title, lprice, addProduct 활용하기
      * 참고) onclick='addProduct(${JSON.stringify(itemDto)})'
      */
-    return ``
+    return `<div class="search-itemDto">
+            <div class="search-itemDto-left">
+                <img src="${itemDto.image}" alt="">
+            </div>
+            <div class="search-itemDto-center">
+                <div>${itemDto.title}</div>
+                <div class="price">
+                    ${itemDto.lprice}
+                    <span class="unit">원</span>
+                </div>
+            </div>
+            <div class="search-itemDto-right">
+                <img src="images/icon-save.png" alt="" onclick='addProduct(${JSON.stringify(itemDto)})'>
+            </div>
+        </div>`
 }
 
 function addProduct(itemDto) {
